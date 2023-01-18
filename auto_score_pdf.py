@@ -17,7 +17,7 @@ from reportlab.pdfbase.pdfmetrics import registerFont
 
 #####################################################################################################
 # 配置作业pdf文件路径
-path = r'D:\trade\class\document\lab01-03'
+path = r'D:\trade\class\document\CBK'
 #####################################################################################################
 
 # 设置中文字体，避免乱码
@@ -29,7 +29,7 @@ registerFont(TTFont('STXINGKA', 'stxingka.ttf')) # 华文行楷
 # FONT_TT = random.choice(['Simhei', 'STSong', 'STKaiti', 'STXINGKA'])
 imagepath = ['gou/1.png','gou/2.png','gou/3.png','gou/4.png']
 FONT_TT = 'STSong'
-score_range={'A':[95,100],'B':[90,95], 'C':[80,90], 'D':[70,80], 'E':[60,70]}
+score_range={'A':[92,98],'B':[86,92], 'C':[81,86], 'D':[70,80], 'E':[60,70]}
 conments = {
     'A':['实验比较认真，步骤清晰', '实验结果正确，完成认真', '实验步骤清晰，结果正确'],
     'B':['实验比较认真，结果基本正确', '实验结果基本正确，完成认真', '实验步骤清晰，结果基本正确'],
@@ -38,16 +38,27 @@ conments = {
     'E':['做实验不严谨, 有些结果错误', '实验结果有些错误，完成不认真', '实验步骤不清晰，结果有些有误']}
 
 def write_score(labelname, fname, score):
-    df = pd.read_excel('Java名单.xlsx')
+    df = pd.read_excel('CBK名单-登记分数用.xlsx')
     labelnum = int(labelname[-2:])
     lab = '实验{}'.format(labelnum)
     for item in df['姓名']:
         if item in fname:
             df[lab][df['姓名']== item] = score
-            df.to_excel('Java名单.xlsx', index=False, header=True)
+            df.to_excel('CBK名单-登记分数用.xlsx', index=False, header=True)
             return
 
     return
+
+def get_grad(filename):
+    df = pd.read_excel('CBK等级名单.xlsx')
+    for item in df['姓名']:
+        if item in filename:
+            grad = df['等级'][df['姓名'] == item]
+            return grad.values[0][0]
+    #默认给一个B
+    return 'B'
+
+
 def score_pdf(in_file, scoresrange='A', comment_num='A', labelname = 'lab01', fname=''):
     '''
     @in_file: 待批改的文件
@@ -69,16 +80,21 @@ def score_pdf(in_file, scoresrange='A', comment_num='A', labelname = 'lab01', fn
 
     # python作业2
     txt_comment = random.choice(conments[comment_num])
-    # text_conf = [[txt_score, 230, 198, 60],
-    #             [txt_comment, 290, 200, 18],
-    #             ['鄢锦芳', 185, 140, 20]
-    #             ]
-    height = 590
-    x = 50
-    text_conf = [[txt_score, 230+x, 198+height, 60],
-                [txt_comment, 290+x, 200+height, 18],
-                ['鄢锦芳', 230+x, 160+height, 20]
-                ]
+    global text_conf
+    if int(labelname[-2:])>3:
+        low = 40
+        x = 60
+        text_conf = [[txt_score, 230, 198-low, 60],
+                    [txt_comment, 290, 200-low, 18],
+                    ['鄢锦芳', 185+x, 140-low, 20]
+                    ]
+    else:
+        height = 590
+        x = 50
+        text_conf = [[txt_score, 230+x, 198+height, 60],
+                    [txt_comment, 290+x, 200+height, 18],
+                    ['鄢锦芳', 230+x, 180+height, 20]
+                    ]
     #####################################################################################################
     output_file = f'{os.path.splitext(in_file)[0]}_改.pdf'
 
@@ -93,8 +109,9 @@ def score_pdf(in_file, scoresrange='A', comment_num='A', labelname = 'lab01', fn
         canvas.setFillColorRGB(255, 0, 0)
         canvas.drawString(value[1], value[2], value[0])
     #打红勾
-    imge = random.choice(imagepath)
-    canvas.drawImage(imge,100,220,400,300, mask=[150,220,200,255,180,255])
+    if int(labelname[-2:]) < 4:
+        imge = random.choice(imagepath)
+        canvas.drawImage(imge,100,220,400,300, mask=[150,220,200,255,180,255])
     canvas.showPage()  # 关闭当前页，开始新页
     # 加入后续页面
     for i in range(1, len(template.pages)):
@@ -108,27 +125,24 @@ def score_pdf(in_file, scoresrange='A', comment_num='A', labelname = 'lab01', fn
 
 
 def score_pdf_all(path):
-
     for path1 in os.listdir(path):
-        pathname = os.path.join(path,path1)
+        pathname = os.path.join(path, path1)
         if os.path.isdir(pathname):
-            for path2 in os.listdir(pathname):
-                pathname1 = os.path.join(pathname, path2)
-                if os.path.isdir(pathname1):
-                    # 获取所有文件名的列表
-                    filename_list = os.listdir(pathname1)
-                    # 获取所有pdf文件名列表
-                    pdf_list = [filename for filename in filename_list if filename.endswith(".pdf")]
+            # 获取所有文件名的列表
+            filename_list = os.listdir(pathname)
+            # 获取所有pdf文件名列表
+            pdf_list = [filename for filename in filename_list if filename.endswith(".pdf")]
 
-                    for pdf in pdf_list:
-                        pdf_file = (pathname1 + '/' + pdf)
-                        score_pdf(pdf_file, path2[0],path2[0], path1, pdf)
+            for pdf in pdf_list:
+                pdf_file = (pathname + '/' + pdf)
+                grad = get_grad(pdf)
+                score_pdf(pdf_file, grad, grad, path1, pdf)
 
 
 if __name__ == '__main__':
 
     # test
-    # in_file = r'D:\2022_01\CW2006_python程序设计\全批改\test\2040706303_张骏_作业1_组合数据类型知识点汇总.pdf'
+    # in_file = r'D:\trade\class\document\CBK\test\1940706308_袁金景_实验1 Java Web开发环境的搭建.pdf'
     # score_pdf(in_file)
 
     score_pdf_all(path)

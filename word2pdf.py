@@ -11,30 +11,27 @@ def get_path():
     # path = r'./'
 
     # 这里需要修改为你的word的文件夹路径
-    path = r'D:\trade\class\document\lab01-03'
+    path = r'D:\trade\class\document\CBK'
 
     for path1 in os.listdir(path):
         pathname = os.path.join(path,path1)
         if os.path.isdir(pathname):
-            for path1 in os.listdir(pathname):
-                pathname1 = os.path.join(pathname, path1)
-                if os.path.isdir(pathname1):
-                    # 获取所有文件名的列表
-                    filename_list = os.listdir(pathname1)
-                    # 获取所有word文件名列表
-                    wordname_list = [filename for filename in filename_list \
-                                     if filename.endswith((".doc", ".docx"))]
-                    for wordname in wordname_list:
-                        # 分离word文件名称和后缀，转化为pdf名称
-                        pdfname = os.path.splitext(wordname)[0] + '.pdf'
-                        # 如果当前word文件对应的pdf文件存在，则不转化
-                        if pdfname in filename_list:
-                            continue
-                        # 拼接 路径和文件名
-                        wordpath = os.path.join(pathname1, wordname)
-                        pdfpath = os.path.join(pathname1, pdfname)
-                        # 生成器
-                        yield wordpath, pdfpath
+            # 获取所有文件名的列表
+            filename_list = os.listdir(pathname)
+            # 获取所有word文件名列表
+            wordname_list = [filename for filename in filename_list \
+                             if filename.endswith((".doc", ".docx"))]
+            for wordname in wordname_list:
+                # 分离word文件名称和后缀，转化为pdf名称
+                pdfname = os.path.splitext(wordname)[0] + '.pdf'
+                # 如果当前word文件对应的pdf文件存在，则不转化
+                if pdfname in filename_list:
+                    continue
+                # 拼接 路径和文件名
+                wordpath = os.path.join(pathname, wordname)
+                pdfpath = os.path.join(pathname, pdfname)
+                # 生成器
+                yield wordpath, pdfpath
 
 
 def doc2pdf():
