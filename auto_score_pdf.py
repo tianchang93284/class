@@ -17,7 +17,7 @@ from reportlab.pdfbase.pdfmetrics import registerFont
 
 #####################################################################################################
 # 配置作业pdf文件路径
-path = r'D:\trade\class\document\CBK'
+path = r'D:\trade\class\document\CBM'
 #####################################################################################################
 
 # 设置中文字体，避免乱码
@@ -38,19 +38,19 @@ conments = {
     'E':['做实验不严谨, 有些结果错误', '实验结果有些错误，完成不认真', '实验步骤不清晰，结果有些有误']}
 
 def write_score(labelname, fname, score):
-    df = pd.read_excel('CBK名单-登记分数用.xlsx')
+    df = pd.read_excel('CBM名单-登记分数用.xlsx')
     labelnum = int(labelname[-2:])
     lab = '实验{}'.format(labelnum)
     for item in df['姓名']:
         if item in fname:
             df[lab][df['姓名']== item] = score
-            df.to_excel('CBK名单-登记分数用.xlsx', index=False, header=True)
+            df.to_excel('CBM名单-登记分数用.xlsx', index=False, header=True)
             return
 
     return
 
 def get_grad(filename):
-    df = pd.read_excel('CBK等级名单.xlsx')
+    df = pd.read_excel('CBM等级名单.xlsx')
     for item in df['姓名']:
         if item in filename:
             grad = df['等级'][df['姓名'] == item]
@@ -81,7 +81,7 @@ def score_pdf(in_file, scoresrange='A', comment_num='A', labelname = 'lab01', fn
     # python作业2
     txt_comment = random.choice(conments[comment_num])
     global text_conf
-    if int(labelname[-2:])>3:
+    if int(labelname[-2:])>4:
         low = 40
         x = 60
         text_conf = [[txt_score, 230, 198-low, 60],
@@ -109,7 +109,7 @@ def score_pdf(in_file, scoresrange='A', comment_num='A', labelname = 'lab01', fn
         canvas.setFillColorRGB(255, 0, 0)
         canvas.drawString(value[1], value[2], value[0])
     #打红勾
-    if int(labelname[-2:]) < 4:
+    if int(labelname[-2:]) < 5:
         imge = random.choice(imagepath)
         canvas.drawImage(imge,100,220,400,300, mask=[150,220,200,255,180,255])
     canvas.showPage()  # 关闭当前页，开始新页

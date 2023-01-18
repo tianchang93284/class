@@ -11,7 +11,7 @@ def get_path():
     # path = r'./'
 
     # 这里需要修改为你的word的文件夹路径
-    path = r'D:\trade\class\document\CBK'
+    path = r'D:\trade\class\document\CBM'
 
     for path1 in os.listdir(path):
         pathname = os.path.join(path,path1)
