@@ -58,6 +58,16 @@ def get_grad(filename):
     #默认给一个B
     return 'B'
 
+def create_class_test():
+    test_path = r'D:\trade\class\document\CBK课堂测试'
+    paths = os.listdir(test_path)
+    df = pd.read_excel('CBM名单-登记分数用.xlsx')
+    for item in paths:
+        grad = get_grad(item)
+        txt_score = str(random.randint(score_range[grad][0], score_range[grad][1]))
+        df['课堂测试'][df['姓名']==item.split('-')[1]] = txt_score
+    df.to_excel('CBM名单-登记分数用.xlsx', index=False, header=True)
+    return
 
 def score_pdf(in_file, scoresrange='A', comment_num='A', labelname = 'lab01', fname=''):
     '''
@@ -86,7 +96,7 @@ def score_pdf(in_file, scoresrange='A', comment_num='A', labelname = 'lab01', fn
         x = 60
         text_conf = [[txt_score, 230, 198-low, 60],
                     [txt_comment, 290, 200-low, 18],
-                    ['鄢锦芳', 185+x, 140-low, 20]
+                    ['鄢锦芳', 185+x, 170-low, 20]
                     ]
     else:
         height = 590
@@ -142,7 +152,7 @@ def score_pdf_all(path):
 if __name__ == '__main__':
 
     # test
-    # in_file = r'D:\trade\class\document\CBK\test\1940706308_袁金景_实验1 Java Web开发环境的搭建.pdf'
-    # score_pdf(in_file)
+    # in_file = r'D:\trade\class\document\CBM\test\422030901-实验5 JDBC数据库访问(2040706142_黄金鑫).pdf'
+    # score_pdf(in_file, labelname='lab05')
 
-    score_pdf_all(path)
+    #score_pdf_all(path)
