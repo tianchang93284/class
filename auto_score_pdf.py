@@ -17,7 +17,7 @@ from reportlab.pdfbase.pdfmetrics import registerFont
 
 #####################################################################################################
 # 配置作业pdf文件路径
-path = r'D:\trade\class\document\CBM'
+path = r'D:\trade\class\document\CBK'
 #####################################################################################################
 
 # 设置中文字体，避免乱码
@@ -31,7 +31,7 @@ imagepath = ['gou/1.png','gou/2.png','gou/3.png','gou/4.png']
 FONT_TT = 'STSong'
 score_range={'A':[92,98],'B':[86,92], 'C':[81,86], 'D':[70,80], 'E':[60,70]}
 conments = {
-    'A':['实验比较认真，步骤清晰', '实验结果正确，完成认真', '实验步骤清晰，结果正确'],
+    'A':['实验比较认真，所画的图都正确', '实验结果正确，完成比较认真', '实验结果正确，内容比较充实', '报告内容详实，条理清晰', '数据分析方法严谨，数据解读恰当', '分析深入，对问题有清晰认识', '报告结论精准，结论符合实际'],
     'B':['实验比较认真，结果基本正确', '实验结果基本正确，完成认真', '实验步骤清晰，结果基本正确'],
     'C':['实验比较认真，部分结果错误', '实验结果部分有错，完成认真', '实验步骤清晰，结果部分有误'],
     'D':['实验比较认真，有些结果错误', '实验结果有些错误，完成认真', '实验步骤清晰，结果有些有误'],
@@ -59,7 +59,7 @@ def get_grad(filename):
     return 'B'
 
 def create_class_test():
-    test_path = r'D:\trade\class\document\CBK课堂测试'
+    test_path = r'D:\trade\class\document\CBM课堂测试word'
     paths = os.listdir(test_path)
     df = pd.read_excel('CBM名单-登记分数用.xlsx')
     for item in paths:
@@ -69,7 +69,7 @@ def create_class_test():
     df.to_excel('CBM名单-登记分数用.xlsx', index=False, header=True)
     return
 
-def score_pdf(in_file, scoresrange='A', comment_num='A', labelname = 'lab01', fname=''):
+def score_pdf(in_file, scoresrange='100', comment_num='A', labelname = 'lab01'):
     '''
     @in_file: 待批改的文件
     根据配置的分数做批改，并生成 in_file_批改.pdf
@@ -85,25 +85,25 @@ def score_pdf(in_file, scoresrange='A', comment_num='A', labelname = 'lab01', fn
     # python 作业2
     # 文本，横坐标，纵坐标，字号
     #random.seed = 20220101
-    txt_score = str(random.randint(score_range[scoresrange][0], score_range[scoresrange][1]))
-    write_score(labelname, fname, txt_score)
+    txt_score = str(scoresrange)#str(random.randint(score_range[scoresrange][0], score_range[scoresrange][1]))
+    #write_score(labelname, fname, txt_score)
 
     # python作业2
     txt_comment = random.choice(conments[comment_num])
     global text_conf
-    if int(labelname[-2:])>4:
+    if True or int(labelname[-2:])>4:
         low = 40
         x = 60
         text_conf = [[txt_score, 230, 198-low, 60],
                     [txt_comment, 290, 200-low, 18],
-                    ['鄢锦芳', 185+x, 170-low, 20]
+                    ['赵稳', 185+x, 170-low, 20]
                     ]
     else:
         height = 590
         x = 50
         text_conf = [[txt_score, 230+x, 198+height, 60],
-                    [txt_comment, 290+x, 200+height, 18],
-                    ['鄢锦芳', 230+x, 180+height, 20]
+                    #[txt_comment, 290+x, 200+height, 18],
+                    ['赵稳', 230+x, 180+height, 20]
                     ]
     #####################################################################################################
     output_file = f'{os.path.splitext(in_file)[0]}_改.pdf'
@@ -119,7 +119,7 @@ def score_pdf(in_file, scoresrange='A', comment_num='A', labelname = 'lab01', fn
         canvas.setFillColorRGB(255, 0, 0)
         canvas.drawString(value[1], value[2], value[0])
     #打红勾
-    if int(labelname[-2:]) < 5:
+    if False and int(labelname[-2:]) < 5:
         imge = random.choice(imagepath)
         canvas.drawImage(imge,100,220,400,300, mask=[150,220,200,255,180,255])
     canvas.showPage()  # 关闭当前页，开始新页
@@ -133,7 +133,33 @@ def score_pdf(in_file, scoresrange='A', comment_num='A', labelname = 'lab01', fn
         canvas.showPage()
     canvas.save()
 
+def get_path(filepath):
+    items = os.listdir(filepath)
+    for item in items:
+        item_path = os.path.join(filepath, item)
+        if os.path.isfile(item_path) and item.endswith((".pdf")):
+            yield item_path
+        elif os.path.isdir(item_path):
+            yield from get_path(item_path)
 
+def score_pdf_by_excel():
+    pdfpath = 'D:\\trade\class\document\软件工程'
+    # filename_list = os.listdir(pdfpath)
+    # # 获取所有pdf文件名列表
+    # pdf_list = [filename for filename in filename_list if filename.endswith(".pdf")]
+    df = pd.read_excel('D:\\trade\class\document\CCC班级书面作业3.xlsx')
+    i = 0
+    for pdf in get_path(pdfpath):
+        score_pdf(pdf, scoresrange=str(random.randint(85,96)))
+        # for item in df['学号']:
+        #     if str(item) in pdf:
+        #         score = df['作业3'][df['学号']==item]
+        #         score_pdf(pdf, scoresrange=score.values[0])
+        #         i+=1
+        #         break
+        i+=1
+        # if i>=1:
+        #     break
 def score_pdf_all(path):
     for path1 in os.listdir(path):
         pathname = os.path.join(path, path1)
@@ -156,3 +182,5 @@ if __name__ == '__main__':
     # score_pdf(in_file, labelname='lab05')
 
     #score_pdf_all(path)
+    #create_class_test()
+    score_pdf_by_excel()
