@@ -47,7 +47,7 @@ def get_path(filepath):
 
 
 def doc2pdf():
-    path = r'D:\trade\class\document\软件工程'
+    path = r'D:\trade\class\202307\源文件'#要用绝对路径
     word = gencache.EnsureDispatch("kwps.Application")  # 打开word应用程序
     #word = client.dynamic.Dispatch("kwps.Application")
     for wordpath, pdfpath in get_path(path):
@@ -59,12 +59,30 @@ def doc2pdf():
 def convert_word_to_pdf():
     # word = comtypes.client.CreateObject("Word.Application")
     # word.Visible = 0
-    path = r'D:\trade\class\document\软件工程'
+    path = r'D:\trade\class\2023'
     for wordpath, pdfpath in get_path(path):
         convert(wordpath,wordpath)
         # newpdf = word.Documents.Open(wordpath)
         # newpdf.SaveAs(pdfpath, FileFormat=17)
         # newpdf.Close()
+
+
+def get_file(path):
+    items = os.listdir(path)
+    for item in items:
+        item_path = os.path.join(path, item)
+        if os.path.isfile(item_path):
+            yield item_path
+        elif os.path.isdir(item_path):
+            yield from get_file(item_path)
+
+def delete_file():
+    pdfpath = 'D:\\trade\class\document\软件工程-提交'
+    for pdf in get_file(pdfpath):
+        if '_改' not in pdf:
+            os.remove(pdf)
+
+#delete_file()
 
 if __name__ == "__main__":
     #convert_word_to_pdf()

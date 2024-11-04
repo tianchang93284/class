@@ -69,6 +69,71 @@ def create_class_test():
     df.to_excel('CBM名单-登记分数用.xlsx', index=False, header=True)
     return
 
+def only_score_pdf(in_file, zuoye, scoresrange='100'):
+    '''
+    @in_file: 待批改的文件
+    根据配置的分数做批改，并生成 in_file_批改.pdf
+    '''
+    #####################################################################################################
+    # 需要配置批改的分数、评语、文本的坐标位置、字号
+    # 数据处理与可视化作业2
+    # text_conf = [['90', 400, 750, 60],
+    #             ['作业比较认真', 380, 720, 18],
+    #             ['郑耀东', 420, 690, 14]
+    #             ]
+    #
+    # python 作业2
+    # 文本，横坐标，纵坐标，字号
+    #random.seed = 20220101
+    txt_score = str(scoresrange)#str(random.randint(score_range[scoresrange][0], score_range[scoresrange][1]))
+    #write_score(labelname, fname, txt_score)
+
+    # python作业2
+    #txt_comment = random.choice(conments[comment_num])
+    global text_conf
+    if zuoye == '作业1':#底部
+        low = 40
+        x = 60
+        text_conf = [[txt_score, 230-x, 198-low, 60],
+                    # [txt_comment, 290, 200-low, 18],
+                    # ['赵稳', 185+x, 170-low, 20]
+                    ]
+    else:#右上角
+        height = 590
+        x = 100
+        text_conf = [[txt_score, 230+x, 198+height, 60],
+                    #[txt_comment, 290+x, 200+height, 18],
+                    #['赵稳', 230+x, 180+height, 20]
+                    ]
+    #####################################################################################################
+    output_file = f'{os.path.splitext(in_file)[0]}_改.pdf'
+
+    template = PdfReader(in_file)
+    canvas = Canvas(output_file)
+
+    template_obj0 = pagexobj(template.pages[0])
+    obj0_name = makerl(canvas, template_obj0)
+    canvas.doForm(obj0_name)
+    for value in text_conf:
+        canvas.setFont(FONT_TT, value[3])  # 设置字号
+        canvas.setFillColorRGB(255, 0, 0)
+        canvas.drawString(value[1], value[2], value[0])
+    #打红勾
+    if zuoye != '作业1':
+        imge = random.choice(imagepath)
+        canvas.drawImage(imge,100,220,400,300, mask=[150,220,200,255,180,255])
+    canvas.showPage()  # 关闭当前页，开始新页
+    # 加入后续页面
+    for i in range(1, len(template.pages)):
+        template_obj1 = pagexobj(template.pages[i])
+        obj1_name = makerl(canvas, template_obj1)
+        canvas.doForm(obj1_name)
+        imge = random.choice(imagepath)
+        canvas.drawImage(imge, 100, 220, 400, 300, mask=[150, 220, 200, 255, 180, 255])
+        canvas.showPage()
+    canvas.save()
+
+
 def score_pdf(in_file, scoresrange='100', comment_num='A', labelname = 'lab01'):
     '''
     @in_file: 待批改的文件
@@ -91,40 +156,40 @@ def score_pdf(in_file, scoresrange='100', comment_num='A', labelname = 'lab01'):
     # python作业2
     txt_comment = random.choice(conments[comment_num])
     global text_conf
-    if True or int(labelname[-2:])>4:
-        low = 40
-        x = 60
-        text_conf = [[txt_score, 230, 198-low, 60],
-                    [txt_comment, 290, 200-low, 18],
-                    ['赵稳', 185+x, 170-low, 20]
-                    ]
-    else:
-        height = 590
-        x = 50
-        text_conf = [[txt_score, 230+x, 198+height, 60],
-                    #[txt_comment, 290+x, 200+height, 18],
-                    ['赵稳', 230+x, 180+height, 20]
-                    ]
+    # if True or int(labelname[-2:])>4:
+    #     low = 40
+    #     x = 60
+    #     text_conf = [[txt_score, 230, 198-low, 60],
+    #                 [txt_comment, 290, 200-low, 18],
+    #                 ['赵稳', 185+x, 170-low, 20]
+    #                 ]
+    # else:
+    #     height = 590
+    #     x = 50
+    #     text_conf = [[txt_score, 230+x, 198+height, 60],
+    #                 #[txt_comment, 290+x, 200+height, 18],
+    #                 ['赵稳', 230+x, 180+height, 20]
+    #                 ]
     #####################################################################################################
     output_file = f'{os.path.splitext(in_file)[0]}_改.pdf'
 
     template = PdfReader(in_file)
     canvas = Canvas(output_file)
 
-    template_obj0 = pagexobj(template.pages[0])
-    obj0_name = makerl(canvas, template_obj0)
-    canvas.doForm(obj0_name)
-    for value in text_conf:
-        canvas.setFont(FONT_TT, value[3])  # 设置字号
-        canvas.setFillColorRGB(255, 0, 0)
-        canvas.drawString(value[1], value[2], value[0])
+    # template_obj0 = pagexobj(template.pages[0])
+    # obj0_name = makerl(canvas, template_obj0)
+    # canvas.doForm(obj0_name)
+    # for value in text_conf:
+    #     canvas.setFont(FONT_TT, value[3])  # 设置字号
+    #     canvas.setFillColorRGB(255, 0, 0)
+    #     canvas.drawString(value[1], value[2], value[0])
     #打红勾
-    if False and int(labelname[-2:]) < 5:
-        imge = random.choice(imagepath)
-        canvas.drawImage(imge,100,220,400,300, mask=[150,220,200,255,180,255])
-    canvas.showPage()  # 关闭当前页，开始新页
+    # if False and int(labelname[-2:]) < 5:
+    #     imge = random.choice(imagepath)
+    #     canvas.drawImage(imge,100,220,400,300, mask=[150,220,200,255,180,255])
+    # canvas.showPage()  # 关闭当前页，开始新页
     # 加入后续页面
-    for i in range(1, len(template.pages)):
+    for i in range(0, len(template.pages)):
         template_obj1 = pagexobj(template.pages[i])
         obj1_name = makerl(canvas, template_obj1)
         canvas.doForm(obj1_name)
@@ -142,12 +207,28 @@ def get_path(filepath):
         elif os.path.isdir(item_path):
             yield from get_path(item_path)
 
+
+def score_pdf_excel():
+    df = pd.read_excel('D:\\trade\class\\202312\BZL班级实验(1)\\bzL实验7和实验11.xlsx')
+
+    pdfpath = 'D:\\trade\class\\202312\BZL班级实验(1)'
+    for pdf in get_path(pdfpath):
+        filename = os.path.splitext(pdf)[0].split('\\')[-1]
+        stuno = os.path.splitext(pdf)[0].split('\\')[-2][:10]
+        zuoye = os.path.splitext(pdf)[0].split('\\')[-3].split('+')[0]
+        score = df[zuoye][df['学号'] == int(stuno)].values[0]
+        only_score_pdf(pdf, zuoye, score)
+
+
+
+    pass
+
 def score_pdf_by_excel():
-    pdfpath = 'D:\\trade\class\document\软件工程'
+    pdfpath = 'D:\\trade\\class\\202312'
     # filename_list = os.listdir(pdfpath)
     # # 获取所有pdf文件名列表
     # pdf_list = [filename for filename in filename_list if filename.endswith(".pdf")]
-    df = pd.read_excel('D:\\trade\class\document\CCC班级书面作业3.xlsx')
+    #df = pd.read_excel('D:\\trade\class\document\CCC班级书面作业3.xlsx')
     i = 0
     for pdf in get_path(pdfpath):
         score_pdf(pdf, scoresrange=str(random.randint(85,96)))
@@ -183,4 +264,4 @@ if __name__ == '__main__':
 
     #score_pdf_all(path)
     #create_class_test()
-    score_pdf_by_excel()
+    score_pdf_excel()
