@@ -8,6 +8,17 @@ import os
 from docx2pdf import convert
 from win32com.client import constants,gencache
 import shutil
+import random
+import pandas as pd
+from reportlab.pdfgen.canvas import Canvas
+from pdfrw import PdfReader
+from pdfrw.buildxobj import pagexobj
+from pdfrw.toreportlab import makerl
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase import pdfmetrics
+
+# 注册自定义字体
+pdfmetrics.registerFont(TTFont("MyCustomFont", "STSONG.TTF"))
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -22,11 +33,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.real_name_position = None
         self.pdf_width = None
         self.pdf_height = None
-        self.real_name_position_width = None
-        self.real_name_position_height = None
+        self.real_name_position_width = 199
+        self.real_name_position_height = 656
         self.pushButton_word2pdf.clicked.connect(self.word2pdf)
+        self.pushButton_apply.clicked.connect(self.apply_ok)
         self.comment_lists = None
         self.target_files = None
+        self.FONT_TT = 'MyCustomFont'
+        self.imagepath = ['gou/1.png','gou/2.png','gou/3.png','gou/4.png']
+        self.pushButton_excel.clicked.connect(self.open_excel)
 
     def open_pdf(self):
         # 打开文件对话框选择 PDF 文件
@@ -81,6 +96,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         target_folder = os.path.join(parent_folder, "统计")
         os.makedirs(target_folder, exist_ok=True)
 
+        self.target_files = target_folder
+
         # 删除文件
         genpath = os.path.join(os.getenv('temp'), 'gen_py')
         if os.path.exists(genpath):
@@ -113,14 +130,119 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     doc.Close()  # 关闭原来word文件
                     print(f"已转换 Word 文件并保存为 PDF: {target_file_path}")
         word.Quit()
-
         print("所有 Word 文件已转换为 PDF 文件并保存在 '统计' 文件夹中。")
 
-    def apply_Ok(self):
-        #先将word全部转成pdf
-        pass
+    def get_score(self, pdf_file):
+        if self.label_exel.text() == "":
+            #如果pdf_file，含有A,B,C,D代表区间，如果没有从100-90取
+            grades = ["A", "B", "C", "D", "E","F"]
+            # 拆分字符串为各个区间，并解析为数值对
+            ranges_with_grades = {}
+            for i, part in enumerate(self.lineEdit_score.text().split(';')):
+                start, end = map(int, part.split('-'))
+                ranges_with_grades[grades[i]] = (start, end)
+
+            for grad in grades:
+                if grad in pdf_file:
+                    return random.randint(ranges_with_grades[grad][1],ranges_with_grades[grad][0])
+        else:
+            # 使用 pandas 打开 Excel 文件
+            try:
+                df = pd.read_excel(self.label_exel.text())
+                # 假设 Excel 文件中包含 "名字" 和 "成绩" 列
+                if "姓名" in df.columns and "成绩" in df.columns:
+                    names = df["姓名"].tolist()
+                    scores = df["成绩"].tolist()
+                    # 打印名字和成绩
+                    for name, score in zip(names, scores):
+                        if name in pdf_file:
+                            print(f"姓名: {name}, 成绩: {score}")
+                            return score
+                else:
+                    print("Excel文件中未找到 '姓名' 或 '成绩' 列")
+
+            except Exception as e:
+                print(f"无法读取Excel文件: {e}")
+
+    def get_comment(self, pdf_file):
+        # 分隔数据并构建字典
+        comments_dict = {}
+        #grades = ["A", "B", "C", "D", "E", "F"]
+        for part in self.lineEdit_pingyu.text().split(";"):
+            if ":" in part:
+                # 拆分等级和评语部分
+                grade, comments = part.split(":")
+                grade = grade.strip()  # 去除等级两侧空格
+                # 去除引号和多余空格，拆分评语为列表
+                comments_list = [comment.strip().strip("'") for comment in comments.split(",") if comment.strip()]
+                comments_dict[grade] = comments_list
+
+        for grad,comment_list in comments_dict.items():
+            if grad in pdf_file:
+                return random.choice(comment_list)
+
+    def score_pdf(self, pdf_file):
+        txt_score = str(self.get_score(pdf_file))
+        txt_comment = self.get_comment(pdf_file)
+
+        text_conf = [[txt_score, self.real_name_position_width, 800-self.real_name_position_height, 60],
+                    [txt_comment, self.real_name_position_width+60, 800-self.real_name_position_height+2, 18],
+                    [self.lineEdit_teacherName.text(), self.real_name_position_width+15, 800-self.real_name_position_height-28, 20]
+                    ]
+        output_file = f'{os.path.splitext(pdf_file)[0]}_改.pdf'
+        template = PdfReader(pdf_file)
+        canvas = Canvas(output_file)
+
+        template_obj0 = pagexobj(template.pages[0])
+        obj0_name = makerl(canvas, template_obj0)
+        canvas.doForm(obj0_name)
+        for value in text_conf:#第一页打分
+            canvas.setFont(self.FONT_TT, value[3])  # 设置字号
+            canvas.setFillColorRGB(255, 0, 0)
+            canvas.drawString(value[1], value[2], value[0])
+
+        #第一页是否打勾
+        if self.checkBox_head.isChecked():
+            imge = random.choice(self.imagepath)
+            canvas.drawImage(imge, 100, 220, 400, 300, mask=[150, 220, 200, 255, 180, 255])
+        canvas.showPage()  # 关闭当前页，开始新页
+
+        # 加入后续页面
+        for i in range(1, len(template.pages)):
+            template_obj1 = pagexobj(template.pages[i])
+            obj1_name = makerl(canvas, template_obj1)
+            canvas.doForm(obj1_name)
+            imge = random.choice(self.imagepath)
+            canvas.drawImage(imge, 100, 220, 400, 300, mask=[150, 220, 200, 255, 180, 255])
+            canvas.showPage()
+        canvas.save()
 
 
+    def open_excel(self):
+        # 打开文件对话框，设置文件过滤为 Excel 文件
+        file_path, _ = QFileDialog.getOpenFileName(None, "选择Excel文件", "", "Excel文件 (*.xls *.xlsx)")
+        if file_path:
+            self.label_exel.setText(file_path)
+
+    def get_path(self, filepath):
+        items = os.listdir(filepath)
+        for item in items:
+            item_path = os.path.join(filepath, item)
+            if os.path.isfile(item_path) and item.endswith((".pdf")):
+                yield item_path
+            elif os.path.isdir(item_path):
+                yield from self.get_path(item_path)
+
+    def apply_ok(self):
+        #遍历pdf文件
+        for full_path in self.get_path(self.target_files):
+            if self.checkBox_zuoye.isChecked() and "作业" in full_path:
+                self.score_pdf(full_path)
+            if self.checkBox_shiyan.isChecked()and "实验" in full_path:
+                self.score_pdf(full_path)
+            #删除full_path
+            print(f"批改文件: {full_path}")
+            os.remove(full_path)
 
 # 启动应用
 app = QApplication(sys.argv)
