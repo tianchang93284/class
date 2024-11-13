@@ -16,7 +16,7 @@ from pdfrw.buildxobj import pagexobj
 from pdfrw.toreportlab import makerl
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
-
+from DrawingDialog import DrawingDialog
 # 注册自定义字体
 pdfmetrics.registerFont(TTFont("MyCustomFont", "STSONG.TTF"))
 
@@ -40,8 +40,23 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.comment_lists = None
         self.target_files = None
         self.FONT_TT = 'MyCustomFont'
-        self.imagepath = ['gou/1.png','gou/2.png','gou/3.png','gou/4.png']
         self.pushButton_excel.clicked.connect(self.open_excel)
+        self.pushButton_draw.clicked.connect(self.open_draw)
+
+        #self.imagepath = None#['gou/1.png','gou/2.png','gou/3.png','gou/4.png']
+        gou_images = []
+        semigou_images = []
+        x_images = []
+        gou_path = "gou"
+        # 遍历文件夹下的文件
+        for file_name in os.listdir(gou_path):
+            if file_name.startswith("gou") and file_name.endswith(".png"):
+                gou_images.append(gou_path+"/"+file_name)
+            elif file_name.startswith("semigou") and file_name.endswith(".png"):
+                semigou_images.append(gou_path+"/"+file_name)
+            elif file_name.startswith("x") and file_name.endswith(".png"):
+                x_images.append(gou_path+"/"+file_name)
+        self.imagepath = (gou_images * 7) + (semigou_images * 2) + (x_images * 1)
 
     def open_pdf(self):
         # 打开文件对话框选择 PDF 文件
@@ -223,6 +238,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         file_path, _ = QFileDialog.getOpenFileName(None, "选择Excel文件", "", "Excel文件 (*.xls *.xlsx)")
         if file_path:
             self.label_exel.setText(file_path)
+
+    def open_draw(self):
+        #打开DrawDialog
+        dialog = DrawingDialog()
+        dialog.exec_()
 
     def get_path(self, filepath):
         items = os.listdir(filepath)
