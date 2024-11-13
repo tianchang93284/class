@@ -219,7 +219,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #第一页是否打勾
         if self.checkBox_head.isChecked():
             imge = random.choice(self.imagepath)
-            canvas.drawImage(imge, 100, 220, 400, 300, mask=[150, 220, 200, 255, 180, 255])
+            canvas.drawImage(imge, 100, 220, 400, 300, mask=[0, 100, 0, 100, 0, 100])
         canvas.showPage()  # 关闭当前页，开始新页
 
         # 加入后续页面
@@ -228,7 +228,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             obj1_name = makerl(canvas, template_obj1)
             canvas.doForm(obj1_name)
             imge = random.choice(self.imagepath)
-            canvas.drawImage(imge, 100, 220, 400, 300, mask=[150, 220, 200, 255, 180, 255])
+            canvas.drawImage(imge, 100, 220, 400, 300, mask=[0, 100, 0, 100, 0, 100])
             canvas.showPage()
         canvas.save()
 
