@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QRadioButton, QButtonGroup, QLabel, QFileDialog
 from PyQt5.QtGui import QPainter, QImage, QPixmap, QPen
 from PyQt5.QtCore import Qt, QPoint
+import os
 
 class DrawingDialog(QDialog):
     def __init__(self):
@@ -38,6 +39,10 @@ class DrawingDialog(QDialog):
         self.image = QImage(self.canvas.size(), QImage.Format_ARGB32)
         self.image.fill(Qt.transparent)  # 背景设置为透明
 
+        #刷新按钮
+        refresh_button = QPushButton("刷新")
+        refresh_button.clicked.connect(self.refesh_canvas)
+
         # 保存按钮
         save_button = QPushButton("保存")
         save_button.clicked.connect(self.save_image)
@@ -45,6 +50,7 @@ class DrawingDialog(QDialog):
         # 添加布局
         layout.addLayout(button_layout)
         layout.addWidget(self.canvas)
+        layout.addWidget(refresh_button)
         layout.addWidget(save_button)
         self.setLayout(layout)
 
@@ -76,8 +82,32 @@ class DrawingDialog(QDialog):
         # 更新画布上的图片显示
         self.canvas.setPixmap(QPixmap.fromImage(self.image))
 
+    def refesh_canvas(self ):
+        self.image.fill(Qt.transparent)
+        self.canvas.clear()
+
     def save_image(self):
-        # 保存图片
-        file_path, _ = QFileDialog.getSaveFileName(self, "保存图片", "", "PNG图片 (*.png);;JPEG图片 (*.jpg *.jpeg)")
-        if file_path:
-            self.image.save(file_path)
+        # 根据check_button，half_check_button，或cross_button的状态，将图片保存在gou文件夹，命名分别为gou,semigou,x
+        goupath = 'gou'
+        num_str = 0
+        prefix = None
+        for root, dirs, files in os.walk(goupath):
+            for base_name in files:
+                file_path = os.path.join(root, base_name)
+                if self.check_button.isChecked():
+                    prefix = "gou"
+                    if base_name[:3] != prefix:
+                        continue
+                    num_str = max(num_str,int(base_name[3:base_name.find(".png")]))
+                elif self.half_check_button.isChecked():
+                    prefix = "semigou"
+                    if base_name[:7] != prefix:
+                        continue
+                    num_str = max(num_str,int(base_name[7:base_name.find(".png")]))
+                elif self.cross_button.isChecked():
+                    prefix = "x"
+                    if base_name[:1] != prefix:
+                        continue
+                    num_str = max(num_str,int(base_name[1:base_name.find(".png")]))
+        num_str += 1
+        self.image.save("gou/" +prefix+ str(num_str) + ".png")
