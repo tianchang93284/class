@@ -259,9 +259,9 @@ def score_pdf_all(path):
 if __name__ == '__main__':
 
     # test
-    # in_file = r'D:\trade\class\document\CBM\test\422030901-实验5 JDBC数据库访问(2040706142_黄金鑫).pdf'
-    # score_pdf(in_file, labelname='lab05')
+    n_file = r'D:\trade\class\qizhong\中期检查\BJC\实验1\2320710123-熊竟智\1041659321-01+2320710123_熊竟智_Docker容器安装与启动.pdf'
+    score_pdf(in_file, scoresrange=str(random.randint(90,98)))
 
     #score_pdf_all(path)
     #create_class_test()
-    score_pdf_excel()
+    #score_pdf_excel()

@@ -47,7 +47,7 @@ def get_path(filepath):
 
 
 def doc2pdf():
-    path = r'D:\trade\class\202307\源文件'#要用绝对路径
+    path = r'D:\trade\class\qizhong\中期检查'#要用绝对路径
     word = gencache.EnsureDispatch("kwps.Application")  # 打开word应用程序
     #word = client.dynamic.Dispatch("kwps.Application")
     for wordpath, pdfpath in get_path(path):
