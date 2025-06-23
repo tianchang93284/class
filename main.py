@@ -17,6 +17,7 @@ from pdfrw.toreportlab import makerl
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
 from DrawingDialog import DrawingDialog
+import re
 # 注册自定义字体
 pdfmetrics.registerFont(TTFont("MyCustomFont", "STSONG.TTF"))
 
@@ -150,16 +151,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def get_score(self, pdf_file):
         if self.label_exel.text() == "":
             #如果pdf_file，含有A,B,C,D代表区间，如果没有从100-90取
-            grades = ["A", "B", "C", "D", "E","F"]
+            grades = ["A"]
             # 拆分字符串为各个区间，并解析为数值对
             ranges_with_grades = {}
             for i, part in enumerate(self.lineEdit_score.text().split(';')):
                 start, end = map(int, part.split('-'))
                 ranges_with_grades[grades[i]] = (start, end)
 
-            for grad in grades:
-                if grad in pdf_file:
-                    return random.randint(ranges_with_grades[grad][1],ranges_with_grades[grad][0])
+            #for grad in grades:
+             #   if grad in pdf_file:
+            grad = "A"
+            return random.randint(ranges_with_grades[grad][1],ranges_with_grades[grad][0])
         else:
             # 使用 pandas 打开 Excel 文件
             try:
@@ -199,7 +201,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def score_pdf(self, pdf_file):
         txt_score = str(self.get_score(pdf_file))
         txt_comment = self.get_comment(pdf_file)
-
+        
         text_conf = [[txt_score, self.real_name_position_width, 800-self.real_name_position_height, 60],
                     [txt_comment, self.real_name_position_width+60, 800-self.real_name_position_height+2, 18],
                     [self.lineEdit_teacherName.text(), self.real_name_position_width+15, 800-self.real_name_position_height-28, 20]
@@ -231,6 +233,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             canvas.drawImage(imge, 100, 220, 400, 300, mask=[0, 100, 0, 100, 0, 100])
             canvas.showPage()
         canvas.save()
+        
+        return txt_score
 
 
     def open_excel(self):
@@ -254,15 +258,43 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 yield from self.get_path(item_path)
 
     def apply_ok(self):
+        self.target_files = QFileDialog.getExistingDirectory(self, "选择包含文件的文件夹")
+        if not self.target_files:
+            return
+        self.scoresExcel, _ = QFileDialog.getOpenFileName(None, "选择Excel文件", "", "Excel文件 (*.xls *.xlsx)")
+        if not self.scoresExcel:
+            return
+        self.score_df = pd.read_excel(self.scoresExcel)
+        score_cols = [col for col in self.score_df.columns if re.match(r'score_\d+$', col)]
+        if score_cols:
+            # 提取已有字段中的数字编号
+            max_index = max([int(re.search(r'(\d+)', col).group(1)) for col in score_cols])
+            new_col_name = f'score_{max_index + 1}'
+        else:
+            new_col_name = 'score_1'
+        self.score_df[new_col_name] = 0
+        realscore=0
         #遍历pdf文件
         for full_path in self.get_path(self.target_files):
             if self.checkBox_zuoye.isChecked() and "作业" in full_path:
-                self.score_pdf(full_path)
-            if self.checkBox_shiyan.isChecked()and "实验" in full_path:
-                self.score_pdf(full_path)
+                realscore = self.score_pdf(full_path)
+            elif self.checkBox_shiyan.isChecked()and "实验" in full_path:
+                realscore = self.score_pdf(full_path)
+            
+            self.score_df[new_col_name] = realscore
+            
+            # 遍历所有姓名，如果 text 包含这个姓名，则赋值
+            for i, name in self.score_df["姓名"].items():
+                if pd.notnull(name) and str(name) in full_path:
+                    df.at[i, new_col_name] = 90  # 设置你想给的分数
+                    break
+            
             #删除full_path
             print(f"批改文件: {full_path}")
             os.remove(full_path)
+            
+        
+        self.score_df.to_excel(self.scoresExcel, index=False)
 
 # 启动应用
 app = QApplication(sys.argv)
