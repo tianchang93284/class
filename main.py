@@ -185,7 +185,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # 分隔数据并构建字典
         comments_dict = {}
         #grades = ["A", "B", "C", "D", "E", "F"]
-        for part in self.lineEdit_pingyu.text().split(";"):
+        pingyu = self.lineEdit_pingyu.text().split(";")
+        for part in pingyu:
             if ":" in part:
                 # 拆分等级和评语部分
                 grade, comments = part.split(":")
@@ -195,7 +196,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 comments_dict[grade] = comments_list
 
         for grad,comment_list in comments_dict.items():
-            if grad in pdf_file:
+            if grad in "A":
                 return random.choice(comment_list)
 
     def score_pdf(self, pdf_file):
@@ -261,7 +262,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.target_files = QFileDialog.getExistingDirectory(self, "选择包含文件的文件夹")
         if not self.target_files:
             return
-        self.scoresExcel, _ = QFileDialog.getOpenFileName(None, "选择Excel文件", "", "Excel文件 (*.xls *.xlsx)")
+        self.scoresExcel,_ = QFileDialog.getOpenFileName(None, "选择Excel文件", "", "Excel文件 (*.xls *.xlsx)")
         if not self.scoresExcel:
             return
         self.score_df = pd.read_excel(self.scoresExcel)
@@ -276,17 +277,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         realscore=0
         #遍历pdf文件
         for full_path in self.get_path(self.target_files):
-            if self.checkBox_zuoye.isChecked() and "作业" in full_path:
+            if self.checkBox_zuoye.isChecked():
                 realscore = self.score_pdf(full_path)
-            elif self.checkBox_shiyan.isChecked()and "实验" in full_path:
+            elif self.checkBox_shiyan.isChecked():
                 realscore = self.score_pdf(full_path)
-            
-            self.score_df[new_col_name] = realscore
-            
+              
             # 遍历所有姓名，如果 text 包含这个姓名，则赋值
             for i, name in self.score_df["姓名"].items():
                 if pd.notnull(name) and str(name) in full_path:
-                    df.at[i, new_col_name] = 90  # 设置你想给的分数
+                    self.score_df.at[i, new_col_name] = realscore  # 设置你想给的分数
                     break
             
             #删除full_path
