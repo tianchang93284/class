@@ -15,13 +15,6 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout" columnstretch="1,1,8,0,0,0">
-    <item row="11" column="0" colspan="2">
-     <widget class="QCheckBox" name="checkBox_head">
-      <property name="text">
-       <string>头页是否添加对勾</string>
-      </property>
-     </widget>
-    </item>
     <item row="13" column="1">
      <widget class="QPushButton" name="pushButton_apply">
       <property name="text">
@@ -157,6 +150,20 @@
      <widget class="QLabel" name="label_exel">
       <property name="text">
        <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="11" column="0">
+     <widget class="QCheckBox" name="checkBox_head">
+      <property name="text">
+       <string>头页是否添加对勾</string>
+      </property>
+     </widget>
+    </item>
+    <item row="11" column="1">
+     <widget class="QCheckBox" name="checkBox_needExcel">
+      <property name="text">
+       <string>不要excel</string>
       </property>
      </widget>
     </item>

@@ -19,9 +19,6 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName("gridLayout")
-        self.checkBox_head = QtWidgets.QCheckBox(self.centralwidget)
-        self.checkBox_head.setObjectName("checkBox_head")
-        self.gridLayout.addWidget(self.checkBox_head, 11, 0, 1, 2)
         self.pushButton_apply = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton_apply.setObjectName("pushButton_apply")
         self.gridLayout.addWidget(self.pushButton_apply, 13, 1, 1, 1)
@@ -78,6 +75,12 @@ class Ui_MainWindow(object):
         self.label_exel.setText("")
         self.label_exel.setObjectName("label_exel")
         self.gridLayout.addWidget(self.label_exel, 12, 1, 1, 1)
+        self.checkBox_head = QtWidgets.QCheckBox(self.centralwidget)
+        self.checkBox_head.setObjectName("checkBox_head")
+        self.gridLayout.addWidget(self.checkBox_head, 11, 0, 1, 1)
+        self.checkBox_needExcel = QtWidgets.QCheckBox(self.centralwidget)
+        self.checkBox_needExcel.setObjectName("checkBox_needExcel")
+        self.gridLayout.addWidget(self.checkBox_needExcel, 11, 1, 1, 1)
         self.gridLayout.setColumnStretch(0, 1)
         self.gridLayout.setColumnStretch(1, 1)
         self.gridLayout.setColumnStretch(2, 8)
@@ -96,7 +99,6 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.checkBox_head.setText(_translate("MainWindow", "头页是否添加对勾"))
         self.pushButton_apply.setText(_translate("MainWindow", "应用"))
         self.pushButton_draw.setText(_translate("MainWindow", "手动添加对勾"))
         self.lineEdit_pingyu.setText(_translate("MainWindow", "A:\'实验比较认真，所画的图都正确\', \'实验结果正确，完成比较认真\', \'实验结果正确，内容比较充实\', \'报告内容详实，条理清晰\', \'数据分析方法严谨，数据解读恰当\', \'分析深入，对问题有清晰认识\', \'报告结论精准，结论符合实际\';B:\'实验比较认真，结果基本正确\', \'实验结果基本正确，完成认真\', \'实验步骤清晰，结果基本正确\';C:\'实验比较认真，部分结果错误\', \'实验结果部分有错，完成认真\', \'实验步骤清晰，结果部分有误\';D:\'实验比较认真，有些结果错误\', \'实验结果有些错误，完成认真\', \'实验步骤清晰，结果有些有误\';E:\'做实验不严谨, 有些结果错误\', \'实验结果有些错误，完成不认真\', \'实验步骤不清晰，结果有些有误\'"))
@@ -113,6 +115,8 @@ class Ui_MainWindow(object):
         self.pushButton_position.setText(_translate("MainWindow", "设置批改位置"))
         self.pushButton_openpdf.setText(_translate("MainWindow", "选择pdf文件"))
         self.pushButton_excel.setText(_translate("MainWindow", "按excel导入成绩"))
+        self.checkBox_head.setText(_translate("MainWindow", "头页是否添加对勾"))
+        self.checkBox_needExcel.setText(_translate("MainWindow", "不要excel"))
 
 
 if __name__ == "__main__":
